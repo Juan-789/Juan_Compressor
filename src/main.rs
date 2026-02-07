@@ -28,14 +28,30 @@ fn main()-> Result<(), Box<dyn Error>>{
 
     println!("file contents");
     println!("{}", contents);
-    let huffmanTree = HuffmanTreeBuilder(contents);
-    
+    let huffmanTreeOption<HuffmanNode> = HuffmanTreeBuilder(contents);
+
+    if let Some(root_node) = huffmanTree {
+        // 1. Create the empty map to hold our dictionary
+        let mut code_table: HashMap<char, String> = HashMap::new();
+
+        // 2. Kick off the recursion
+        // We start with an empty string ""
+        generate_binary_table(&root_node, String::new(), &mut code_table);
+
+        // 3. Print the results
+        println!("--- Huffman Code Table ---");
+        for (char_key, binary_code) in &code_table {
+            println!("'{}' : {}", char_key, binary_code);
+        }
+    } else {
+        println!("The tree was empty!");
+    }
     return Ok(());
 }
 
 
 
-fn HuffmanTreeBuilder(contents: String) -> HuffmanNode { //makes the string into a map of numbers
+fn HuffmanTreeBuilder(contents: String) -> Option<HuffmanNode> { //makes the string into a map of numbers
     let mut HuffmanTree: HashMap<char, u32> = HashMap::new();
     for c in contents.chars() { //this  also takes the \n (newline)
         let count = HuffmanTree.entry(c).or_insert(0);
@@ -66,7 +82,20 @@ fn HuffmanTreeBuilder(contents: String) -> HuffmanNode { //makes the string into
     println!("tree ts");
 
     println!("{:#?}", root);
-    return root.unwrap();
+    return root;
+}
+
+fn generate_binary_table(node: &HuffmanNode, prefix: String, map: &mut HashMap<char, String>) {
+    if let Some(ch) = node.c {
+        map.insert(ch, prefix);
+    } else {
+        if let Some(ref left_child) = node.left {
+            generate_binary_table(left_child, format!("{}0", prefix), map);
+        }
+        if let Some(ref right_child) = node.right {
+            generate_binary_table(right_child, format!("{}1", prefix), map);
+        }
+    }
 }
 
 
