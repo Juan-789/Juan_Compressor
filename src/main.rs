@@ -28,7 +28,7 @@ fn main()-> Result<(), Box<dyn Error>>{
 
     println!("file contents");
     println!("{}", contents);
-    let huffmanTreeOption<HuffmanNode> = HuffmanTreeBuilder(contents);
+    let huffmanTree: Option<HuffmanNode> = HuffmanTreeBuilder(contents);
 
     if let Some(root_node) = huffmanTree {
         // 1. Create the empty map to hold our dictionary
