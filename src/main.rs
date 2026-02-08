@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::env;
 use std::error::Error;
 use std::collections::BinaryHeap;
-use std:: fs::read_to_string;
+use std:: fs::{read_to_string, write};
 
 #[derive(Debug, PartialEq, Eq)]
 struct HuffmanNode{
@@ -12,6 +12,41 @@ struct HuffmanNode{
     left: Option<Box<HuffmanNode>>,
     right: Option<Box<HuffmanNode>>,
 }
+struct BitWriter{
+    buffer: u8,
+    bit_count: u8,
+    bytes: Vec<u8>,
+}
+
+impl BitWriter{
+    fn new() -> Self{
+        BitWriter {buffer: 0, bit_count: 0, bytes: Vec::new()}
+    }
+    fn write_bit(&mut self, bit: bool) {
+        self.buffer = self.buffer << 1;
+        if bit {
+            self.buffer |= 1;
+        }
+        self.bit_count += 1;
+    
+        if self.bit_count == 8 {
+            self.bytes.push(self.buffer);
+            self.buffer = 0;
+            self.bit_count = 0;
+        }
+    }
+    fn flush(&mut self) -> Vec<u8> {
+        if self.bit_count > 0 {
+            self.buffer = self.buffer << (8 - self.bit_count);
+            self.bytes.push(self.buffer);
+        }
+        self.bytes.clone()
+    }
+}
+
+
+
+
 
 fn main()-> Result<(), Box<dyn Error>>{
     let args: Vec<String> = env::args().collect();
@@ -26,7 +61,7 @@ fn main()-> Result<(), Box<dyn Error>>{
 
     println!("file contents");
     println!("{}", contents);
-    let huffman_tree: Option<HuffmanNode> = huffman_tree_builder(contents);
+    let huffman_tree: Option<HuffmanNode> = huffman_tree_builder(contents.clone());
 
     if let Some(root_node) = huffman_tree {
         // 1. Create the empty map to hold our dictionary
@@ -41,6 +76,23 @@ fn main()-> Result<(), Box<dyn Error>>{
         for (char_key, binary_code) in &code_table {
             println!("'{}' : {}", char_key, binary_code);
         }
+        let mut compressed = String::new();
+        for meow in contents.chars() {
+            //maybe one character doesnt get translated
+            compressed.push_str(&code_table.get(&meow).unwrap());
+        }
+        let mut writer = BitWriter::new();
+        
+        for c in compressed.chars(){
+            match c{
+                '1' => writer.write_bit(true),
+                '0' => writer.write_bit(false),
+                _ => panic!("not a bit"),
+            }
+        }
+        writer.flush();
+        //now lets make the binary representation of it
+        write("out_success.juan", &writer.bytes);
     } else {
         println!("The tree was empty!");
     }
