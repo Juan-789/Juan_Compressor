@@ -1,9 +1,7 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
-use std::collections::btree_map::Keys;
 use std::env;
 use std::error::Error;
-use core::cmp::Reverse;
 use std::collections::BinaryHeap;
 use std:: fs::read_to_string;
 
@@ -28,9 +26,9 @@ fn main()-> Result<(), Box<dyn Error>>{
 
     println!("file contents");
     println!("{}", contents);
-    let huffmanTree: Option<HuffmanNode> = HuffmanTreeBuilder(contents);
+    let huffman_tree: Option<HuffmanNode> = huffman_tree_builder(contents);
 
-    if let Some(root_node) = huffmanTree {
+    if let Some(root_node) = huffman_tree {
         // 1. Create the empty map to hold our dictionary
         let mut code_table: HashMap<char, String> = HashMap::new();
 
@@ -51,18 +49,18 @@ fn main()-> Result<(), Box<dyn Error>>{
 
 
 
-fn HuffmanTreeBuilder(contents: String) -> Option<HuffmanNode> { //makes the string into a map of numbers
-    let mut HuffmanTree: HashMap<char, u32> = HashMap::new();
+fn huffman_tree_builder(contents: String) -> Option<HuffmanNode> { //makes the string into a map of numbers
+    let mut huffman_tree: HashMap<char, u32> = HashMap::new();
     for c in contents.chars() { //this  also takes the \n (newline)
-        let count = HuffmanTree.entry(c).or_insert(0);
+        let count = huffman_tree.entry(c).or_insert(0);
         *count += 1;
     }
 
     let mut min_heap = BinaryHeap::new();
     //now that we have the map, lets build the min heap
-    for k in HuffmanTree.keys() {
-        println!("key:{} count:{:?}", k, HuffmanTree.get(k));
-        min_heap.push(HuffmanNode{count: *HuffmanTree.get(k).unwrap(), c: Some(*k), left: None, right: None})
+    for k in huffman_tree.keys() {
+        println!("key:{} count:{:?}", k, huffman_tree.get(k));
+        min_heap.push(HuffmanNode{count: *huffman_tree.get(k).unwrap(), c: Some(*k), left: None, right: None})
     }
     println!("{:?}", min_heap);
     while min_heap.len()>1 {
